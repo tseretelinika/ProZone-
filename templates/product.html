@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+{% block title %}{{ product.name }} — ProZone Sports{% endblock %}
+
+{% block content %}
+{% set emojis = {'Running':'👟','Lifestyle':'👕','Football':'⚽','Apparel':'🧥','Training':'🏋️','Hiking':'🥾','Equipment':'🎒','Basketball':'🏀'} %}
+
+<section class="page-section">
+  <div class="container">
+
+
+    <nav aria-label="breadcrumb" class="mb-4">
+      <ol class="breadcrumb" style="font-size:0.85rem;">
+        <li class="breadcrumb-item"><a href="{{ url_for('index') }}" style="color:var(--brown-500)">Home</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('brand', brand_name=product.brand) }}" style="color:var(--brown-500)">{{ product.brand }}</a></li>
+        <li class="breadcrumb-item active">{{ product.name }}</li>
+      </ol>
+    </nav>
+
+    <div class="row g-5">
+
+      <div class="col-md-5">
+        <div class="product-detail-img">{{ emojis.get(product.category, '🏅') }}</div>
+      </div>
+
+
+      <div class="col-md-7">
+        <div class="product-detail-brand-badge">
+          <i class="bi {{ BRAND_META[product.brand].icon }} me-1"></i>{{ product.brand }}
+        </div>
+        <div class="product-detail-title">{{ product.name }}</div>
+
+        {% if product.avg_rating %}
+        <div class="stars mb-2">
+          {% for i in range(product.avg_rating|int) %}⭐{% endfor %}
+          <span style="color:var(--text-light);font-size:0.85rem;margin-left:6px;">{{ product.avg_rating }} / 5 ({{ product.reviews|length }} reviews)</span>
+        </div>
+        {% endif %}
+
+        <div class="product-detail-price">${{ "%.2f"|format(product.price) }}</div>
+
+        <div class="mb-3">
+          <span class="me-2" style="font-size:0.85rem;color:var(--text-light);">Category:</span>
+          <span style="font-weight:600;color:var(--brown-600);">{{ product.category }}</span>
+        </div>
+
+        {% if product.stock > 0 %}
+        <span class="stock-badge mb-3 d-inline-block"><i class="bi bi-check-circle me-1"></i>{{ product.stock }} in stock</span>
+        {% else %}
+        <span class="stock-badge mb-3 d-inline-block" style="background:#fdecea;color:#c62828;">Out of stock</span>
+        {% endif %}
+
+        <p style="color:var(--text-mid);line-height:1.7;margin-bottom:1.5rem;">{{ product.description }}</p>
+
+        {% if current_user.is_authenticated %}
+          {% if product.stock > 0 %}
+          <form method="POST" action="{{ url_for('add_to_cart', pid=product.id) }}" class="d-inline">
+            <button type="submit" class="btn-brown" style="font-size:1rem;padding:0.75rem 2rem;">
+              <i class="bi bi-cart-plus"></i> Add to Cart
+            </button>
+          </form>
+          {% endif %}
+        {% else %}
+        <div class="info-box">
+          <i class="bi bi-lock me-2" style="color:var(--brown-500)"></i>
+          <a href="{{ url_for('login') }}" style="color:var(--brown-600);font-weight:600;">Sign in</a> to add items to your cart.
+        </div>
+        {% endif %}
+
+        {% if current_user.is_admin %}
+        <div class="mt-3 d-flex gap-2 flex-wrap">
+          <a href="{{ url_for('admin_edit_product', pid=product.id) }}" class="btn-brown-outline">
+            <i class="bi bi-pencil"></i> Edit Product
+          </a>
+          <form method="POST" action="{{ url_for('admin_delete_product', pid=product.id) }}" onsubmit="return confirm('Delete this product?')">
+            <button type="submit" class="btn-danger-sm"><i class="bi bi-trash"></i> Delete</button>
+          </form>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <hr class="divider">
+
+
+    <div class="row g-5">
+      <div class="col-md-8">
+        <div class="section-title">Reviews</div>
+        <div class="section-line"></div>
+
+        {% if reviews %}
+          {% for r in reviews %}
+          <div class="review-card">
+            <div class="d-flex justify-content-between align-items-start mb-1">
+              <div>
+                <span class="review-author">{{ r.author.username }}</span>
+                <span class="ms-2 stars">{% for i in range(r.rating) %}⭐{% endfor %}</span>
+              </div>
+              <div class="review-meta">{{ r.created_at.strftime('%d %b %Y') }}</div>
+            </div>
+            <p style="margin:0.4rem 0 0.6rem;color:var(--text-mid);font-size:0.92rem;">{{ r.content }}</p>
+            {% if current_user.is_authenticated and (r.user_id == current_user.id or current_user.is_admin) %}
+            <div class="d-flex gap-2 flex-wrap">
+              {% if r.user_id == current_user.id %}
+              <a href="{{ url_for('edit_review', rid=r.id) }}" class="btn-brown-outline" style="padding:0.3rem 0.8rem;font-size:0.78rem;">
+                <i class="bi bi-pencil"></i> Edit
+              </a>
+              {% endif %}
+              <form method="POST" action="{{ url_for('delete_review', rid=r.id) }}" onsubmit="return confirm('Delete this review?')">
+                <button type="submit" class="btn-danger-sm"><i class="bi bi-trash"></i> Delete</button>
+              </form>
+            </div>
+            {% endif %}
+          </div>
+          {% endfor %}
+        {% else %}
+        <div class="empty-state" style="padding:2rem 1rem;">
+          <i class="bi bi-chat-square-text"></i>
+          <p>No reviews yet. Be the first!</p>
+        </div>
+        {% endif %}
+      </div>
+
+
+      <div class="col-md-4">
+        {% if current_user.is_authenticated %}
+          {% if user_review %}
+          <div class="info-box">
+            <i class="bi bi-check-circle me-2" style="color:var(--brown-500)"></i>
+            You've already reviewed this product.
+          </div>
+          {% else %}
+          <div style="background:var(--white);border-radius:var(--radius);border:1px solid var(--brown-200);padding:1.5rem;box-shadow:var(--shadow-sm);">
+            <h5 style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--brown-700);margin-bottom:1.25rem;">Write a Review</h5>
+            <form method="POST">
+              {{ form.hidden_tag() }}
+              <div class="mb-3">
+                {{ form.rating.label(class="form-label") }}
+                {{ form.rating(class="form-select") }}
+              </div>
+              <div class="mb-3">
+                {{ form.content.label(class="form-label") }}
+                {{ form.content(class="form-control", rows=4, placeholder="Share your experience...") }}
+                {% if form.content.errors %}
+                <div class="invalid-feedback d-block">{{ form.content.errors[0] }}</div>
+                {% endif %}
+              </div>
+              {{ form.submit(class="btn-brown w-100 justify-content-center") }}
+            </form>
+          </div>
+          {% endif %}
+        {% else %}
+        <div class="info-box">
+          <i class="bi bi-lock me-2" style="color:var(--brown-500)"></i>
+          <a href="{{ url_for('login') }}" style="color:var(--brown-600);font-weight:600;">Sign in</a> to leave a review.
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

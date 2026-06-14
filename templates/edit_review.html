@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Edit Review — ProZone{% endblock %}
+
+{% block content %}
+<section class="page-section">
+  <div class="container">
+    <div class="form-card">
+      <div class="text-center mb-4">
+        <h2 style="font-family:'Barlow Condensed',sans-serif;font-weight:800;color:var(--brown-700);font-size:2rem;">Edit Review</h2>
+        <p style="color:var(--text-light);font-size:0.88rem;">
+          for <strong style="color:var(--brown-600);">{{ review.product.name }}</strong>
+        </p>
+      </div>
+      <form method="POST" novalidate>
+        {{ form.hidden_tag() }}
+        <div class="mb-3">
+          {{ form.rating.label(class="form-label") }}
+          {{ form.rating(class="form-select") }}
+        </div>
+        <div class="mb-4">
+          {{ form.content.label(class="form-label") }}
+          {{ form.content(class="form-control", rows=5) }}
+          {% if form.content.errors %}<div class="invalid-feedback d-block">{{ form.content.errors[0] }}</div>{% endif %}
+        </div>
+        <div class="d-flex gap-2">
+          {{ form.submit(class="btn-brown") }}
+          <a href="{{ url_for('product_detail', pid=review.product_id) }}" class="btn-brown-outline">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}

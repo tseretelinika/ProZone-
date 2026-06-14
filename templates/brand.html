@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}{{ brand }} — ProZone Sports{% endblock %}
+
+{% block content %}
+{% set meta = BRAND_META[brand] %}
+
+
+<section class="brand-hero">
+  <div class="container">
+    <div class="brand-hero-icon"><i class="bi {{ meta.icon }}"></i></div>
+    <div class="brand-hero-title">{{ brand }}</div>
+    <div class="brand-hero-tagline">{{ meta.tagline }}</div>
+    <p class="mt-2" style="opacity:0.75;font-size:0.92rem;">{{ meta.desc }}</p>
+  </div>
+</section>
+
+
+<section class="page-section">
+  <div class="container">
+    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+      <div>
+        <div class="section-title">All Products</div>
+        <div class="section-line" style="margin-bottom:0"></div>
+      </div>
+      <span style="color:var(--text-light);font-size:0.9rem;">{{ products|length }} items</span>
+    </div>
+
+    {% if products %}
+    <div class="row g-4">
+      {% set emojis = {'Running':'👟','Lifestyle':'👕','Football':'⚽','Apparel':'🧥','Training':'🏋️','Hiking':'🥾','Equipment':'🎒','Basketball':'🏀'} %}
+      {% for p in products %}
+      <div class="col-sm-6 col-md-4 col-lg-3">
+        <div class="product-card">
+          <div class="product-card-img">{{ emojis.get(p.category, '🏅') }}</div>
+          <div class="product-card-body">
+            <div class="product-card-category">{{ p.category }}</div>
+            <div class="product-card-name">{{ p.name }}</div>
+            {% if p.avg_rating %}
+            <div class="stars mb-1" style="font-size:0.8rem;">
+              {% for i in range(p.avg_rating|int) %}⭐{% endfor %}
+              <span style="color:var(--text-light);font-size:0.75rem;"> ({{ p.avg_rating }})</span>
+            </div>
+            {% endif %}
+            <div class="product-card-price">${{ "%.2f"|format(p.price) }}</div>
+            <a href="{{ url_for('product_detail', pid=p.id) }}" class="btn-brown w-100 justify-content-center">View Product</a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <i class="bi bi-box-seam"></i>
+      <p>No products available yet.</p>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

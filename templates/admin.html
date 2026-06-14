@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% block title %}Admin Panel — ProZone{% endblock %}
+
+{% block content %}
+
+
+<section class="admin-header">
+  <div class="container">
+    <h1 style="font-family:'Barlow Condensed',sans-serif;font-size:2.8rem;font-weight:800;">
+      <i class="bi bi-speedometer2 me-2"></i>Admin Panel
+    </h1>
+    <p style="opacity:0.7;font-size:0.9rem;">Manage users, products and reviews</p>
+  </div>
+</section>
+
+<section class="page-section">
+  <div class="container">
+
+
+    <div class="row g-4 mb-5">
+      <div class="col-md-4">
+        <div class="admin-stat-card">
+          <div style="font-size:0.8rem;color:var(--text-light);text-transform:uppercase;letter-spacing:0.07em;font-weight:600;margin-bottom:0.25rem;">Total Users</div>
+          <div class="admin-stat-number">{{ users|length }}</div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="admin-stat-card">
+          <div style="font-size:0.8rem;color:var(--text-light);text-transform:uppercase;letter-spacing:0.07em;font-weight:600;margin-bottom:0.25rem;">Products</div>
+          <div class="admin-stat-number">{{ products|length }}</div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="admin-stat-card">
+          <div style="font-size:0.8rem;color:var(--text-light);text-transform:uppercase;letter-spacing:0.07em;font-weight:600;margin-bottom:0.25rem;">Reviews</div>
+          <div class="admin-stat-number">{{ reviews|length }}</div>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="d-flex align-items-center justify-content-between mb-3">
+      <div class="section-title">Users</div>
+    </div>
+    <div class="admin-table mb-5">
+      <table class="table mb-0">
+        <thead>
+          <tr>
+            <th>ID</th><th>Username</th><th>Email</th><th>Role</th><th>Joined</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for u in users %}
+          <tr>
+            <td>{{ u.id }}</td>
+            <td><strong>{{ u.username }}</strong></td>
+            <td>{{ u.email }}</td>
+            <td>
+              {% if u.role == 'admin' %}<span class="badge-admin">Admin</span>
+              {% else %}<span class="badge-user">User</span>{% endif %}
+            </td>
+            <td>{{ u.joined_at.strftime('%d %b %Y') }}</td>
+            <td>
+              <div class="d-flex gap-2 flex-wrap">
+                {% if u.id != current_user.id %}
+                <form method="POST" action="{{ url_for('admin_toggle_role', uid=u.id) }}">
+                  <button type="submit" class="btn-brown-outline" style="padding:0.3rem 0.8rem;font-size:0.78rem;">
+                    {% if u.role == 'admin' %}Revoke Admin{% else %}Make Admin{% endif %}
+                  </button>
+                </form>
+                <form method="POST" action="{{ url_for('admin_delete_user', uid=u.id) }}" onsubmit="return confirm('Delete user {{ u.username }}?')">
+                  <button type="submit" class="btn-danger-sm"><i class="bi bi-trash"></i></button>
+                </form>
+                {% else %}
+                <span style="font-size:0.78rem;color:var(--text-light);">(you)</span>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+
+    <div class="d-flex align-items-center justify-content-between mb-3">
+      <div class="section-title">Products</div>
+      <a href="{{ url_for('admin_add_product') }}" class="btn-brown">
+        <i class="bi bi-plus-lg"></i> Add Product
+      </a>
+    </div>
+    <div class="admin-table mb-5">
+      <table class="table mb-0">
+        <thead>
+          <tr>
+            <th>ID</th><th>Name</th><th>Brand</th><th>Category</th><th>Price</th><th>Stock</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in products %}
+          <tr>
+            <td>{{ p.id }}</td>
+            <td><a href="{{ url_for('product_detail', pid=p.id) }}" style="color:var(--brown-600);font-weight:600;text-decoration:none;">{{ p.name }}</a></td>
+            <td>{{ p.brand }}</td>
+            <td>{{ p.category }}</td>
+            <td>${{ "%.2f"|format(p.price) }}</td>
+            <td>{{ p.stock }}</td>
+            <td>
+              <div class="d-flex gap-2 flex-wrap">
+                <a href="{{ url_for('admin_edit_product', pid=p.id) }}" class="btn-brown-outline" style="padding:0.3rem 0.8rem;font-size:0.78rem;">
+                  <i class="bi bi-pencil"></i>
+                </a>
+                <form method="POST" action="{{ url_for('admin_delete_product', pid=p.id) }}" onsubmit="return confirm('Delete {{ p.name }}?')">
+                  <button type="submit" class="btn-danger-sm"><i class="bi bi-trash"></i></button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+
+    <div class="section-title mb-3">All Reviews</div>
+    <div class="admin-table">
+      <table class="table mb-0">
+        <thead>
+          <tr>
+            <th>User</th><th>Product</th><th>Rating</th><th>Date</th><th>Preview</th><th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in reviews %}
+          <tr>
+            <td><strong>{{ r.author.username }}</strong></td>
+            <td>
+              <a href="{{ url_for('product_detail', pid=r.product_id) }}" style="color:var(--brown-600);text-decoration:none;">
+                {{ r.product.name }}
+              </a>
+            </td>
+            <td><span class="stars">{% for i in range(r.rating) %}⭐{% endfor %}</span></td>
+            <td>{{ r.created_at.strftime('%d %b %Y') }}</td>
+            <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ r.content }}</td>
+            <td>
+              <form method="POST" action="{{ url_for('delete_review', rid=r.id) }}" onsubmit="return confirm('Delete this review?')">
+                <button type="submit" class="btn-danger-sm"><i class="bi bi-trash"></i></button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}My Cart — ProZone{% endblock %}
+
+{% block content %}
+<section class="page-section">
+  <div class="container">
+    <div class="mb-4">
+      <div class="section-title"><i class="bi bi-cart3 me-2"></i>My Cart</div>
+      <div class="section-line"></div>
+    </div>
+
+    {% if items %}
+    <div class="row g-4">
+      <div class="col-lg-8">
+        <div class="cart-table">
+          <table class="table mb-0">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Price</th>
+                <th>Qty</th>
+                <th>Subtotal</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in items %}
+              <tr>
+                <td>
+                  <a href="{{ url_for('product_detail', pid=item.product.id) }}" style="color:var(--brown-700);font-weight:600;text-decoration:none;">
+                    {{ item.product.name }}
+                  </a>
+                  <div style="font-size:0.78rem;color:var(--text-light);">{{ item.product.brand }} · {{ item.product.category }}</div>
+                </td>
+                <td>${{ "%.2f"|format(item.product.price) }}</td>
+                <td style="font-weight:700;color:var(--brown-600);">{{ item.quantity }}</td>
+                <td style="font-weight:700;">${{ "%.2f"|format(item.product.price * item.quantity) }}</td>
+                <td>
+                  <form method="POST" action="{{ url_for('remove_from_cart', item_id=item.id) }}">
+                    <button type="submit" class="btn-danger-sm" style="padding:0.3rem 0.6rem;" title="Remove">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </form>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="col-lg-4">
+        <div class="cart-total-box">
+          <h5 style="font-family:'Barlow Condensed',sans-serif;font-weight:800;color:var(--brown-700);font-size:1.5rem;margin-bottom:1rem;">Order Summary</h5>
+          <div class="d-flex justify-content-between mb-2" style="font-size:0.9rem;color:var(--text-mid);">
+            <span>Items ({{ items|length }})</span>
+            <span>${{ "%.2f"|format(total) }}</span>
+          </div>
+          <div class="d-flex justify-content-between mb-2" style="font-size:0.9rem;color:var(--text-mid);">
+            <span>Shipping</span>
+            <span style="color:#388e3c;">Free</span>
+          </div>
+          <hr class="divider" style="margin:0.75rem 0;">
+          <div class="d-flex justify-content-between mb-3">
+            <span style="font-weight:700;font-size:1.05rem;">Total</span>
+            <span style="font-weight:800;font-size:1.3rem;color:var(--brown-600);">${{ "%.2f"|format(total) }}</span>
+          </div>
+          <button class="btn-brown w-100 justify-content-center" style="font-size:1rem;padding:0.75rem;"
+                  onclick="alert('Checkout not implemented — this is a demo store!')">
+            <i class="bi bi-credit-card"></i> Checkout
+          </button>
+        </div>
+      </div>
+    </div>
+
+    {% else %}
+    <div class="empty-state">
+      <i class="bi bi-cart-x"></i>
+      <h4 style="font-family:'Barlow Condensed',sans-serif;font-weight:800;color:var(--brown-700);">Your cart is empty</h4>
+      <p>Browse our brands and add some products!</p>
+      <a href="{{ url_for('index') }}" class="btn-brown mt-2">Start Shopping</a>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

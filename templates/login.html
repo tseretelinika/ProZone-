@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Sign In — ProZone{% endblock %}
+
+{% block content %}
+<section class="page-section">
+  <div class="container">
+    <div class="form-card">
+      <div class="text-center mb-4">
+        <div style="width:60px;height:60px;background:var(--brown-100);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:1.6rem;color:var(--brown-600);">
+          <i class="bi bi-person-fill"></i>
+        </div>
+        <h2 style="font-family:'Barlow Condensed',sans-serif;font-weight:800;color:var(--brown-700);font-size:2rem;">Welcome Back</h2>
+        <p style="color:var(--text-light);font-size:0.88rem;">Sign in to your ProZone account</p>
+      </div>
+
+      <form method="POST" novalidate>
+        {{ form.hidden_tag() }}
+        <div class="mb-3">
+          {{ form.username.label(class="form-label") }}
+          {{ form.username(class="form-control", placeholder="Your username") }}
+          {% if form.username.errors %}<div class="invalid-feedback d-block">{{ form.username.errors[0] }}</div>{% endif %}
+        </div>
+        <div class="mb-4">
+          {{ form.password.label(class="form-label") }}
+          {{ form.password(class="form-control", placeholder="••••••••") }}
+          {% if form.password.errors %}<div class="invalid-feedback d-block">{{ form.password.errors[0] }}</div>{% endif %}
+        </div>
+        {{ form.submit(class="btn-brown w-100 justify-content-center", style="font-size:1rem;padding:0.75rem") }}
+      </form>
+
+      <hr class="divider">
+      <p class="text-center" style="font-size:0.88rem;color:var(--text-light);">
+        Don't have an account?
+        <a href="{{ url_for('register') }}" style="color:var(--brown-600);font-weight:600;">Register here</a>
+      </p>
+    </div>
+  </div>
+</section>
+{% endblock %}

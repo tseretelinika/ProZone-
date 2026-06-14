@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}ProZone Sports — Home{% endblock %}
+
+{% block content %}
+
+
+<section class="hero">
+  <div class="container position-relative">
+    <div class="hero-title">GEAR UP.<br>PLAY HARD.</div>
+    <p class="hero-subtitle">Discover the world's top 5 sports brands — 50 premium products, all in one place.</p>
+    <a href="#brands" class="btn-brown" style="font-size:1rem;padding:0.75rem 2rem;">
+      <i class="bi bi-arrow-down-circle"></i> Shop Brands
+    </a>
+  </div>
+</section>
+
+
+<section class="page-section" id="brands">
+  <div class="container">
+    <div class="section-title">Our Brands</div>
+    <div class="section-line"></div>
+    <div class="row g-4">
+      {% for b, meta in BRAND_META.items() %}
+      <div class="col-6 col-md-4 col-lg">
+        <a href="{{ url_for('brand', brand_name=b) }}" class="brand-card">
+          <div class="brand-card-icon"><i class="bi {{ meta.icon }}"></i></div>
+          <div class="brand-card-name">{{ b }}</div>
+          <div class="brand-card-tagline">{{ meta.tagline }}</div>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+
+{% for brand_name, products in featured.items() %}
+<section class="page-section" style="background: {% if loop.index is odd %}var(--cream){% else %}var(--white){% endif %}; padding-top:2.5rem;padding-bottom:2.5rem;">
+  <div class="container">
+    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+      <div>
+        <div class="section-title">{{ brand_name }}</div>
+        <div class="section-line" style="margin-bottom:0"></div>
+      </div>
+      <a href="{{ url_for('brand', brand_name=brand_name) }}" class="btn-brown-outline">
+        View All <i class="bi bi-arrow-right"></i>
+      </a>
+    </div>
+    <div class="row g-4">
+      {% for p in products %}
+      <div class="col-md-4">
+        <div class="product-card">
+          <div class="product-card-img">
+            {% set emojis = {'Running':'👟','Lifestyle':'👕','Football':'⚽','Apparel':'🧥','Training':'🏋️','Hiking':'🥾','Equipment':'🎒','Basketball':'🏀'} %}
+            {{ emojis.get(p.category, '🏅') }}
+          </div>
+          <div class="product-card-body">
+            <div class="product-card-category">{{ p.category }}</div>
+            <div class="product-card-name">{{ p.name }}</div>
+            <div class="product-card-price">${{ "%.2f"|format(p.price) }}</div>
+            <a href="{{ url_for('product_detail', pid=p.id) }}" class="btn-brown w-100 justify-content-center">
+              View Product
+            </a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endfor %}
+
+{% endblock %}
